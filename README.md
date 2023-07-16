@@ -12,7 +12,9 @@ Limitations:
 ## Installation
 
 ```
-go install github.com/blockpane/topsenders@latest
+git clone https://github.com/blockpane/topsenders.git
+cd topsenders/
+go install ./...
 ```
 
 ## Usage
