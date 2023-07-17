@@ -198,6 +198,9 @@ func GetTxs(url, height string) (root Root, err error) {
 	if err != nil {
 		return
 	}
+	if resp.StatusCode != 200 {
+		log.Fatalf("Error: required endpoint is not present! Is chain running 0.45.2 or later?\n\n%s returned status code %d", url, resp.StatusCode)
+	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
