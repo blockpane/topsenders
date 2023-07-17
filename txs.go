@@ -3,7 +3,6 @@ package top_senders
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fatih/camelcase"
 	"io"
 	"log"
 	"net/http"
@@ -11,12 +10,13 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/fatih/camelcase"
 )
 
 var (
-	ApiURL string
-	RpcUrl string
-	//Interval = 2 * time.Second
+	ApiURL   string
+	RpcUrl   string
 	Interval time.Duration
 	LookBack int
 	Top      int
@@ -86,6 +86,7 @@ func Txs() {
 			resultSorted = resultSorted[:Top]
 		}
 
+		// TODO: this is a hack to clear the screen using an ANSI reset, need to find a better way
 		fmt.Print("\033[2J")
 
 		fmt.Printf("Top %d accounts by TX type Last %d blocks on %s (%s):\n\n", len(resultSorted), count, chain, height)
@@ -126,7 +127,7 @@ func CountMessageTypeBySender(root Root, height string) (countTable map[string]m
 			msgType := strings.TrimLeft(t[len(t)-1], "Msg")
 
 			// prevent duplicates
-			switch true {
+			switch {
 			case isEvm:
 				sender = "unknown_eth_address"
 			case sender == "" && message.Orchestrator != "":
@@ -198,7 +199,7 @@ func GetTxs(url, height string) (root Root, err error) {
 	if err != nil {
 		return
 	}
-	if resp.StatusCode == 404 || resp.StatusCode == 501 {
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusNotImplemented {
 		log.Fatalf("Error: required endpoint is not present! Is chain running 0.45.2 or later?\n\n%s returned status code %d", url, resp.StatusCode)
 	}
 	defer resp.Body.Close()

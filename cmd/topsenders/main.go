@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	topSenders "github.com/blockpane/topsenders"
 	"log"
 	"time"
+
+	topSenders "github.com/blockpane/topsenders"
 )
 
 func main() {
