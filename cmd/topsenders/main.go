@@ -27,5 +27,6 @@ func main() {
 	}
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	topSenders.Txs()
+	go topSenders.Txs()
+	topSenders.Serve("8080")
 }

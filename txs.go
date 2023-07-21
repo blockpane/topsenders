@@ -10,8 +10,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/fatih/camelcase"
 )
 
 var (
@@ -65,8 +63,8 @@ func Txs() {
 		}
 
 		if len(resultSorted) == 0 {
-			fmt.Print("\033[2J")
-			fmt.Printf("Top %d accounts by TX type Last %d blocks on %s (%s):\n\n", len(resultSorted), count, chain, height)
+			//fmt.Print("\033[2J")
+			//fmt.Printf("Top %d accounts by TX type Last %d blocks on %s (%s):\n\n", len(resultSorted), count, chain, height)
 			time.Sleep(Interval)
 			continue
 		}
@@ -87,19 +85,36 @@ func Txs() {
 		}
 
 		// TODO: this is a hack to clear the screen using an ANSI reset, need to find a better way
-		fmt.Print("\033[2J")
+		// fmt.Print("\033[2J")
+		senderTotal := TotalForSender(result)
 
-		fmt.Printf("Top %d accounts by TX type Last %d blocks on %s (%s):\n\n", len(resultSorted), count, chain, height)
+		// fmt.Printf("Top %d accounts by TX type Last %d blocks on %s (%s):\n\n", len(resultSorted), count, chain, height)
+		g := NewGraph(fmt.Sprintf("Top %d accounts by TX type Last %d blocks on %s (%s)", len(resultSorted), count, chain, height))
+		for k, v := range senderTotal {
+			g.Nodes = append(g.Nodes, NewNode(k, v))
+		}
 		for _, row := range resultSorted {
 			for k, v := range row {
 				ks := strings.Split(k, " ")
 				if len(ks) == 1 {
 					ks = append(ks, "")
 				}
-				fmt.Printf("%50s %40s     %5d\n", ks[0], strings.Join(camelcase.Split(ks[1]), " "), v)
+				g.Edges = append(g.Edges, NewEdge(ks[0], ks[1], v))
 			}
 		}
-		fmt.Println()
+		Updates <- &g
+		fmt.Print(".")
+
+		// for _, row := range resultSorted {
+		// 	for k, v := range row {
+		// 		ks := strings.Split(k, " ")
+		// 		if len(ks) == 1 {
+		// 			ks = append(ks, "")
+		// 		}
+		// 		fmt.Printf("%50s (%5d) %40s     %5d\n", ks[0], senderTotal[ks[0]], strings.Join(camelcase.Split(ks[1]), " "), v)
+		// 	}
+		// }
+		// fmt.Println()
 		time.Sleep(Interval)
 	}
 
@@ -147,6 +162,17 @@ func CountMessageTypeBySender(root Root, height string) (countTable map[string]m
 		}
 	}
 	return countTable
+}
+
+func TotalForSender(countTable map[string]map[string]int) (total map[string]int) {
+	total = make(map[string]int)
+	for sender, msgTypes := range countTable {
+		for msgType, count := range msgTypes {
+			total[sender] += count
+			total[msgType] += count
+		}
+	}
+	return total
 }
 
 // CombineCountTables will combine multiple count tables into a single count table
